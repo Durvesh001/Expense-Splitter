@@ -258,9 +258,17 @@ export default function ExpenseApp() {
   }, [data, hydrated]);
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    if (!("serviceWorker" in navigator)) return;
+
+    if (process.env.NODE_ENV === "production") {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+      return;
     }
+
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => registrations.forEach((registration) => registration.unregister()))
+      .catch(() => undefined);
   }, []);
 
   const updateData = (updater: (current: AppData) => AppData) => {
